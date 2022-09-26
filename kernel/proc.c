@@ -196,6 +196,26 @@ proc_pagetable(struct proc *p)
     return 0;
   }
 
+  // map usyscall at USYSCALL(user virtual address), for optimized syscall
+  struct usyscall* usyscall = (struct usyscall*) kalloc();
+  if(usyscall == 0) {
+    uvmunmap(pagetable, TRAMPOLINE, 1, 0);
+    uvmunmap(pagetable, TRAPFRAME, 1, 0);
+    uvmfree(pagetable, 0);
+    return 0;
+  }
+  memset(usyscall, 0, PGSIZE);
+  if(mappages(pagetable, USYSCALL, PGSIZE,
+              (uint64)usyscall, PTE_R|PTE_U) < 0){
+    uvmunmap(pagetable, TRAMPOLINE, 1, 0);
+    uvmunmap(pagetable, TRAPFRAME, 1, 0);
+    kfree(usyscall);
+    uvmunmap(pagetable, USYSCALL, 1, 0);
+    uvmfree(pagetable, 0);
+    return 0;
+  }
+  usyscall->pid = p->pid;
+
   return pagetable;
 }
 
@@ -206,6 +226,7 @@ proc_freepagetable(pagetable_t pagetable, uint64 sz)
 {
   uvmunmap(pagetable, TRAMPOLINE, 1, 0);
   uvmunmap(pagetable, TRAPFRAME, 1, 0);
+  uvmunmap(pagetable, USYSCALL, 1, 1);
   uvmfree(pagetable, sz);
 }
 
@@ -653,4 +674,21 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+int
+pgaccess(uint64 va, int n, uint64 mask_ra) {
+  int mask = 0;
+  struct proc* p = myproc();
+  pagetable_t pagetable = p->pagetable;
+  pte_t* pte;
+  for (int i = 0; i < n; ++i) {
+    if ((pte=walk(pagetable, va+PGSIZE*i, 0))==0) return -1;
+    mask |= ((PTE_A&(*pte))!=0)<<i;
+
+    *pte &= ~PTE_A; // clean access bit, make the next check possible
+  }
+
+  copyout(pagetable, mask_ra, (char*)&mask, sizeof mask);
+  return 0;
 }
