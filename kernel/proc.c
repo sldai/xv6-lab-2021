@@ -5,6 +5,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+#include "sysinfo.h"
 
 struct cpu cpus[NCPU];
 
@@ -164,6 +165,7 @@ freeproc(struct proc *p)
   p->killed = 0;
   p->xstate = 0;
   p->state = UNUSED;
+  p->trace_mask = 0;
 }
 
 // Create a user page table for a given process,
@@ -292,6 +294,9 @@ fork(void)
   // copy saved user registers.
   *(np->trapframe) = *(p->trapframe);
 
+  // copy trace mask
+  np->trace_mask = p->trace_mask;
+  
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
 
@@ -653,4 +658,25 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+int sysinfo(uint64 addr)
+{
+  struct proc *p = myproc();
+  struct sysinfo si;
+  si.freemem = free_amount();
+  si.nproc = nproc();
+  if (copyout(p->pagetable, addr, (char *)&si, sizeof(si)) < 0) {
+    return -1;
+  }
+  return 0;
+}
+
+uint64 nproc() {
+  uint64 num=0;
+  struct proc *p;
+  for(p = proc; p < &proc[NPROC]; p++) {
+    if (p->state != UNUSED) num++;
+  }
+  return num;
 }

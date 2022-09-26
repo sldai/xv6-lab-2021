@@ -1,0 +1,24 @@
+Looking at the backtrace output, which function called syscall?
+
+usetrap -> syscall -> sys_xxx -> xxx
+
+What is the value of p->trapframe->a7 and what does that value represent? (Hint: look user/initcode.S, the first user program xv6 starts.)
+
+15, exec init
+
+What was the previous mode that the CPU was in?
+
+machine mode
+
+Write down the assembly instruction the kernel is panicing at. Which register corresponds to the varialable num?
+
+lw	s2,0(zero)
+reg: s2, variable:num
+
+Why does the kernel crash?
+
+Memory at 0 does not lay on the kernel address space.
+
+What is the name of the binary that was running when the kernel paniced? What is its process id (pid)?
+
+initcode. pid 1.
