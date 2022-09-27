@@ -188,7 +188,7 @@ UPROGS=\
 	$U/_grind\
 	$U/_wc\
 	$U/_zombie\
-
+	$U/_alarmtest\
 
 
 
@@ -405,5 +405,6 @@ myapi.key:
 		false; \
 	fi;
 
+all: $K/kernel fs.img
 
 .PHONY: handin tarball tarball-pref clean grade handin-check

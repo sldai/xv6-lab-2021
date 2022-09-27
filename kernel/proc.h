@@ -105,4 +105,10 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+
+  // sigalamr related
+  int alarm_ticks;
+  int tick_left;
+  void (*handler)();
+  struct trapframe *trapframe_stashed;
 };
