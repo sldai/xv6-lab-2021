@@ -1,0 +1,5 @@
+Q: Why are there missing keys with 2 threads, but not with 1 thread? Identify a sequence of events with 2 threads that can lead to a key being missing.
+A: When concurrency happens, we need handle race conditions.
+A simple example is two thread simultaneously insert, (k0, v0), (k1, v1).
+code: *p = e; will override the other, so one element will be lost.
+
