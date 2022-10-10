@@ -405,5 +405,5 @@ myapi.key:
 		false; \
 	fi;
 
-
+all: $K/kernel fs.img server
 .PHONY: handin tarball tarball-pref clean grade handin-check
