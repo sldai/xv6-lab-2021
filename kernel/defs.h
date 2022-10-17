@@ -3,6 +3,7 @@ struct context;
 struct file;
 struct inode;
 struct pipe;
+struct vma;
 struct proc;
 struct spinlock;
 struct sleeplock;
@@ -104,6 +105,12 @@ void            yield(void);
 int             either_copyout(int user_dst, uint64 dst, void *src, uint64 len);
 int             either_copyin(void *dst, int user_src, uint64 src, uint64 len);
 void            procdump(void);
+
+// mmap.c
+void*           mmap(void *addr, uint64 length, int prot, int flags, int fd, uint64 offset);
+int             munmap(void *addr, uint64 length);
+uint64          mmap_trap(uint64 addr, char read);
+void            mcopy(struct proc* p, struct proc* np);
 
 // swtch.S
 void            swtch(struct context*, struct context*);

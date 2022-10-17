@@ -301,6 +301,9 @@ fork(void)
       np->ofile[i] = filedup(p->ofile[i]);
   np->cwd = idup(p->cwd);
 
+  // copy mmap
+  mcopy(p, np);
+
   safestrcpy(np->name, p->name, sizeof(p->name));
 
   pid = np->pid;
@@ -350,6 +353,13 @@ exit(int status)
       struct file *f = p->ofile[fd];
       fileclose(f);
       p->ofile[fd] = 0;
+    }
+  }
+
+  // Unmap all vma
+  for(int i=0; i<NVMA; i++){
+    if(p->mvma[i].addr!=0){
+      munmap((void*) p->mvma[i].addr, p->mvma[i].length);
     }
   }
 

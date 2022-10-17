@@ -27,6 +27,7 @@ OBJS = \
   $K/file.o \
   $K/pipe.o \
   $K/exec.o \
+  $K/mmap.o \
   $K/sysfile.o \
   $K/kernelvec.o \
   $K/plic.o \
@@ -188,6 +189,7 @@ UPROGS=\
 	$U/_grind\
 	$U/_wc\
 	$U/_zombie\
+	$U/_mmaptest
 
 
 
@@ -405,5 +407,6 @@ myapi.key:
 		false; \
 	fi;
 
+all: $K/kernel fs.img
 
 .PHONY: handin tarball tarball-pref clean grade handin-check
